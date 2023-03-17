@@ -1,20 +1,26 @@
-import math,time
-from termcolor import cprint
+import math,time,os
+from color import cprint
 
 block = "█"
 
+lup = "\u001b[1E"
+ldown = "\u001b[1F"
+
+
 class determinate:
-  def __init__(self,format,char="=",le=10,fill=" ",lead=">",fg="white",bg="black"):
+  def __init__(self,format,char="=",le=10,fill=" ",lead=">",fg=(255,255,255),bg=(0,0,0)):
     self.format = format
     self.char = char
     self.fill = fill
     self.len = le
     self.lead = lead
     self.fg = fg
-    self.bg = "on_"+bg
-  def update(self,pd=-1,done=-1,total=-1):
     
+    self.bg = bg
+    self.init = 0
+  def update(self,pd=-1,done=-1,total=-1):
     print('\033[?25l', end="")
+
     global cchar
     if pd==-1:
       pd = done/total
@@ -27,20 +33,24 @@ class determinate:
       cstr += self.fill
     print("\r", end="", flush=True)
     
-    cstr = f"[{cstr}]"
     perc = f"{round(pd*100)}%"
 
-    res = self.format.replace("%bar",cstr).replace("%perc",perc).replace("%frac",f"{done}/{total}")
+    res = self.format.replace("%bar",cstr).replace("%perc",perc).replace("%frac",f"{done}/{total} ")
     cprint(res,self.fg,self.bg,end="\r")
     print('\033[?25h', end="")
   def stop(self,msg="Done!"):
     print('\033[?25h', end="") 
-    print(f"\r{msg}" + " " * (self.len+len(self.format)+2))
-
-
+    cprint(f"\r{msg}" + " " * (self.len+len(self.format)+2),self.fg,self.bg)
+  def error(self,msg,fg=(255,0,0),bg=(0,0,0)):
+    print('\033[?25h', end="") 
+    print(end="\x1b[2K")
+    print("\033[1A",end="")
+    cprint(f"\r{msg}",fg,bg,flush=True)
+    os._exit(1)
 indeterminate_modes = {
   "classic":["|","/","-","\\"],
-  "arrow":["˅","<","˄",">"],
+  "arrow":[ "▹▹▹▹▹","▸▹▹▹▹","▹▸▹▹▹","▹▹▸▹▹","▹▹▹▸▹","▹▹▹▹▸"
+],
   "dots": ["   ",".  ",".. ","..."],
   "x+": ["×","+","×","+"],
   "spindots":["⠋","⠙","⠹","⠸","⠼","⠴","⠦","⠧","⠇","⠏"],
@@ -51,14 +61,14 @@ indeterminate_modes = {
 }
 
 class indeterminate_spin:
-  def __init__(self,mode="classic",pre="",post="",fg="white",bg="black"):
+  def __init__(self,mode="classic",pre="",post="",fg=(255,255,255),bg=(0,0,0)):
     self.mode = mode
     self.arr = indeterminate_modes[self.mode]
     self.ind = 0
     self.pre = pre
     self.post = post
     self.fg = fg
-    self.bg = "on_"+bg
+    self.bg = bg
   def spin(self,rate=0.1):
     print('\033[?25l', end="") 
     cprint(self.pre+self.arr[self.ind]+self.post,self.fg,self.bg,end="\r",flush=True)
@@ -67,11 +77,21 @@ class indeterminate_spin:
     time.sleep(rate*(4/len(self.arr)))
     
   def stop(self,msg = "DONE!"):
-    print("\r"+msg+" "*(len(msg)+len(self.pre)+len(self.post)+1))
-    print('\033[?25h', end="") 
+    print(end="\x1b[2K")
+    print(end="\x1b[2K")
+    print("\033[1A")
 
+    cprint("\r"+msg,self.fg,self.bg)
+    print('\033[?25h', end="") 
+  def error(self,msg,fg=(255,0,0),bg=(0,0,0)):
+      print('\033[?25h', end="") 
+      print(end="\x1b[2K")
+      print("\033[1A")
+      cprint(f"\r{msg}",fg,bg,flush=True)
+
+      os._exit(1)
 class indeterminate_bar:
-  def __init__(self,format="%bar",l=10,bar="<-->",fill="·",fg="white",bg="black"):
+  def __init__(self,format="%bar",l=10,bar="<-->",fill="·",fg=(255,255,255),bg=(0,0,0)):
     self.len = l
     self.bar = bar
     self.fill = fill
@@ -79,7 +99,8 @@ class indeterminate_bar:
     self.format = format
     self.add = +1
     self.fg = fg
-    self.bg = "on_"+bg
+    self.bg = bg
+
   def update(self,rate):
     print('\033[?25l', end="") 
     s = [self.fill for _ in range(self.len)]
@@ -99,4 +120,13 @@ class indeterminate_bar:
     time.sleep(rate)
   def stop(self,msg="Done!"):
     print('\033[?25h', end="") 
-    print(f"\r{msg}" + " " * (self.len+len(self.format)+2))
+    print(end="\x1b[2K")
+    print("\033[1A",end="")
+
+    cprint(f"\r{msg}",self.fg,self.bg)
+  def error(self,msg,fg=(255,0,0),bg=(0,0,0)):
+      print('\033[?25h', end="") 
+      print(end="\x1b[2K")
+      print("\033[1A")
+      cprint(f"\r{msg}",fg,bg,flush=True)
+      os._exit(1)
