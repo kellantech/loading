@@ -9,7 +9,7 @@ ldown = "\u001b[1F"
 
 
 class determinate:
-  def __init__(self,format,char="=",l=50,fill=" ",lead=">",fg=(255,255,255),bg=(0,0,0)):
+  def __init__(self,format="%bar",char="=",l=50,fill=" ",lead=">",fg=(255,255,255),bg=(0,0,0)):
     self.format = format
     self.char = char
     self.fill = fill
@@ -19,6 +19,8 @@ class determinate:
     
     self.bg = bg
     self.init = 0
+    if self.len <= 0:
+      raise ValueError("bar must have length")
   def update(self,pd=-1,done=-1,total=-1):
     print('\033[?25l', end="")
 
@@ -108,7 +110,10 @@ class indeterminate_bar:
     self.add = +1
     self.fg = fg
     self.bg = bg
-
+    if len(self.bar) > self.len:
+      raise ValueError("moving bar must not be longer than big bar")
+    if len(self.bar) <= 0 or self.len <= 0:
+      raise ValueError("both bars must have length")
   def update(self,rate=0.1):
     print('\033[?25l', end="") 
     s = [self.fill for _ in range(self.len)]
