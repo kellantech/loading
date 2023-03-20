@@ -24,18 +24,21 @@ class determinate:
 
     global cchar
     if pd==-1:
-      pd = done/total
+      pd = done//total
+
     csx = math.floor(pd * self.len)
-    cstr = ""
-    for i in range(csx-1):
-      cstr += self.char
-    cstr += self.lead
-    for i in range(self.len - csx):
-      cstr += self.fill
+    if csx>1:
+      cstr = ""
+      for i in range(csx-1):
+        cstr += self.char
+      cstr += self.lead
+      for i in range(self.len - csx):
+        cstr += self.fill
+    else:
+      cstr = self.fill * self.len
     print("\r", end="", flush=True)
     
     perc = f"{round(pd*100)}%"
-
     res = self.format.replace("%bar",cstr).replace("%perc",perc).replace("%frac",f"{done}/{total} ")
     cprint(res,self.fg,self.bg,end="\r")
     print('\033[?25h', end="")
