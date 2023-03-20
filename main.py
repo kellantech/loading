@@ -27,7 +27,9 @@ class determinate:
     self.init = 0
     if self.len <= 0:
       raise ValueError("bar must have length")
+    self.freeze= False
   def update(self,pd=-1,done=-1,total=-1):
+
     print('\033[?25l', end="")
 
     global cchar
@@ -48,7 +50,8 @@ class determinate:
     
     perc = f"{round(pd*100)}%"
     res = self.format.replace("%bar",cstr).replace("%perc",perc).replace("%frac",f"{done}/{total} ")
-    cprint(res,self.fg,self.bg,end="\r")
+    if not self.freeze:
+      cprint(res,self.fg,self.bg,end="\r")
     print('\033[?25h', end="")
   def stop(self,msg="Done!"):
     print('\033[?25h', end="") 
@@ -58,6 +61,16 @@ class determinate:
     print(end="\x1b[2K")
     cprint(f"\r{msg}",fg,bg,flush=True)
     os._exit(1)
+  def log(self,msg,fg=(255,255,255),bg=(0,0,0)):
+    print()
+    print(ldown)
+    self.freeze = True
+    print(lup,end='')
+    cprint(msg,fg,bg,end="\r")
+    print(ldown,end="")
+    self.freeze = False
+
+
 indeterminate_modes = {
   "classic":["|","/","-","\\"],
   "arrow":[ "▹▹▹▹▹","▸▹▹▹▹","▹▸▹▹▹","▹▹▸▹▹","▹▹▹▸▹","▹▹▹▹▸"
@@ -88,7 +101,7 @@ class indeterminate_spin:
       self.mode = "custom"
       self.arr = mode
 
-
+    self.freeze = False
     self.ind = 0
 
     self.pre = pre
@@ -97,7 +110,8 @@ class indeterminate_spin:
     self.bg = bg
   def update(self,rate=0.1):
     print('\033[?25l', end="") 
-    cprint(self.pre+self.arr[self.ind]+self.post,self.fg,self.bg,end="\r",flush=True)
+    if not self.freeze:
+      cprint(self.pre+self.arr[self.ind]+self.post,self.fg,self.bg,end="\r",flush=True)
     self.ind += 1 
     self.ind %= len(self.arr)
     time.sleep(rate*(4/len(self.arr)))
@@ -112,8 +126,17 @@ class indeterminate_spin:
       print('\033[?25h', end="") 
       print(end="\x1b[2K")
       cprint(f"\r{msg}",fg,bg,flush=True)
-
       os._exit(1)
+
+  def log(self,msg,fg=(255,255,255),bg=(0,0,0)):
+    print()
+    print(ldown)
+    self.freeze = True
+    print(lup,end='')
+    cprint(msg,fg,bg,end="\r")
+    print(ldown,end="")
+    self.freeze = False
+
 class indeterminate_bar:
   def __init__(self,format="%bar",l=50,bar="<-->",fill=mdot,fg=(255,255,255),bg=(0,0,0)):
     self.len = l
@@ -124,6 +147,7 @@ class indeterminate_bar:
     self.add = +1
     self.fg = fg
     self.bg = bg
+    self.freeze = False
     if len(self.bar) > self.len:
       raise ValueError("moving bar must not be longer than big bar")
     if len(self.bar) <= 0 or self.len <= 0:
@@ -142,8 +166,8 @@ class indeterminate_bar:
     if self.prog<1:
       self.add = +1
     s = ''.join(s)
-    
-    cprint(self.format.replace("%bar",s),self.fg,self.bg,end="\r",flush=True)
+    if not self.freeze:
+      cprint(self.format.replace("%bar",s),self.fg,self.bg,end="\r",flush=True)
     time.sleep(rate)
   def stop(self,msg="Done!"):
     print('\033[?25h', end="") 
@@ -156,5 +180,11 @@ class indeterminate_bar:
       cprint(f"\r{msg}",fg,bg,flush=True)
       os._exit(1)
 
-
-  
+  def log(self,msg,fg=(255,255,255),bg=(0,0,0)):
+    print()
+    print(ldown)
+    self.freeze = True
+    print(lup,end='')
+    cprint(msg,fg,bg,end="\r")
+    print(ldown,end="")
+    self.freeze = False
