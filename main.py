@@ -7,6 +7,9 @@ mdot = "·"
 lup = "\u001b[1E"
 ldown = "\u001b[1F"
 
+def init(ignorewin=False):
+  if os.name == 'nt' and not ignorewin:
+    raise OSError("Windows not supported. initilize with ignorewin to supres")
 
 class determinate:
   def __init__(self,format="%bar",char="=",l=50,fill=" ",lead=">",fg=(255,255,255),bg=(0,0,0)):
