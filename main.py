@@ -12,12 +12,15 @@ def init():
     os.system("color")
 
 class determinate:
-  def __init__(self,format="%bar",char="=",l=50,fill=" ",lead=">",fg=(255,255,255),bg=(0,0,0)):
+  def __init__(self,format="[%bar]",char=block,l=50,fill=" ",lead=None,fg=(255,255,255),bg=(0,0,0)):
     self.format = format
     self.char = char
     self.fill = fill
     self.len = l
-    self.lead = lead
+    if lead != None:
+      self.lead = lead
+    else:
+      self.lead = char
     self.fg = fg
     
     self.bg = bg
