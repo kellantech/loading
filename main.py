@@ -1,6 +1,6 @@
 import math,time,os
 from color import cprint
-
+import color
 block = "█"
 mdot = "·"
 
@@ -12,7 +12,7 @@ def init():
     os.system("color")
 
 class determinate:
-  def __init__(self,format="[%bar]",char=block,l=50,fill=" ",lead=None,fg=(255,255,255),bg=(0,0,0)):
+  def __init__(self,format="[%bar]",char=block,l=50,fill=" ",lead=None,fg=(255,255,255),bg=None):
     self.format = format
     self.char = char
     self.fill = fill
@@ -25,12 +25,15 @@ class determinate:
     
     self.bg = bg
     self.init = 0
+    self.logmsg = ""
+
     if self.len <= 0:
       raise ValueError("bar must have length")
     self.freeze= False
-  def update(self,pd=-1,done=-1,total=-1):
+  def update(self,pd=-1,done=-1,total=-1,rate=0.1):
 
     print('\033[?25l', end="")
+    print(end="\x1b[2K")
 
     global cchar
     if pd==-1:
@@ -49,10 +52,11 @@ class determinate:
     print("\r", end="", flush=True)
     
     perc = f"{round(pd*100)}%"
-    res = self.format.replace("%bar",cstr).replace("%perc",perc).replace("%frac",f"{done}/{total} ")
+    res = self.format.replace("%bar",cstr).replace("%perc",perc).replace("%frac",f"{done}/{total}").replace("%log",self.logmsg)
     if not self.freeze:
       cprint(res,self.fg,self.bg,end="\r")
     print('\033[?25h', end="")
+    time.sleep(rate)
   def stop(self,msg="Done!"):
     print('\033[?25h', end="") 
     cprint(f"\r{msg}" + " " * (self.len+len(self.format)+2),self.fg,self.bg)
@@ -62,14 +66,9 @@ class determinate:
     cprint(f"\r{msg}",fg,bg,flush=True)
     os._exit(1)
   def log(self,msg,fg=(255,255,255),bg=(0,0,0)):
-    print()
-    print(ldown)
-    self.freeze = True
-    print(lup,end='')
-    cprint(msg,fg,bg,end="\r")
-    print(ldown,end="")
-    self.freeze = False
-
+    self.logmsg= msg
+    self.lfg = fg
+    self.lbg = bg
 
 indeterminate_modes = {
   "classic":["|","/","-","\\"],
@@ -93,7 +92,7 @@ indeterminate_modes = {
 }
 
 class indeterminate_spin:
-  def __init__(self,mode="classic",pre="",post="",fg=(255,255,255),bg=(0,0,0)):
+  def __init__(self,mode="classic",pre="",post="",fg=(255,255,255),bg=None):
     if type(mode) == str:
       self.mode = mode
       self.arr = indeterminate_modes[self.mode]
@@ -108,10 +107,15 @@ class indeterminate_spin:
     self.post = post
     self.fg = fg
     self.bg = bg
+    self.logmsg = ""
+    self.lfg = (255,0,0)
+    self.lbg = None
   def update(self,rate=0.1):
     print('\033[?25l', end="") 
     if not self.freeze:
-      cprint(self.pre+self.arr[self.ind]+self.post,self.fg,self.bg,end="\r",flush=True)
+      pr = self.pre.replace("%log",self.logmsg)
+      ps = self.post.replace("%log",self.logmsg)
+      cprint(pr+self.arr[self.ind]+ps,self.fg,self.bg,end="\r",flush=True)
     self.ind += 1 
     self.ind %= len(self.arr)
     time.sleep(rate*(4/len(self.arr)))
@@ -128,17 +132,12 @@ class indeterminate_spin:
       cprint(f"\r{msg}",fg,bg,flush=True)
       os._exit(1)
 
-  def log(self,msg,fg=(255,255,255),bg=(0,0,0)):
-    print()
-    print(ldown)
-    self.freeze = True
-    print(lup,end='')
-    cprint(msg,fg,bg,end="\r")
-    print(ldown,end="")
-    self.freeze = False
-
+  def log(self,msg,fg=(255,255,255),bg=None):
+    self.logmsg= msg
+    self.lfg = fg
+    self.lbg = bg
 class indeterminate_bar:
-  def __init__(self,format="%bar",l=50,bar="<-->",fill=mdot,fg=(255,255,255),bg=(0,0,0)):
+  def __init__(self,format="%bar",l=50,bar="<-->",fill=mdot,fg=(255,255,255),bg=None):
     self.len = l
     self.bar = bar
     self.fill = fill
@@ -148,6 +147,7 @@ class indeterminate_bar:
     self.fg = fg
     self.bg = bg
     self.freeze = False
+    self.logmsg = ""
     if len(self.bar) > self.len:
       raise ValueError("moving bar must not be longer than big bar")
     if len(self.bar) <= 0 or self.len <= 0:
@@ -167,7 +167,7 @@ class indeterminate_bar:
       self.add = +1
     s = ''.join(s)
     if not self.freeze:
-      cprint(self.format.replace("%bar",s),self.fg,self.bg,end="\r",flush=True)
+      cprint(self.format.replace("%bar",s).replace("%log",self.logmsg),self.fg,self.bg,end="\r",flush=True)
     time.sleep(rate)
   def stop(self,msg="Done!"):
     print('\033[?25h', end="") 
@@ -181,10 +181,6 @@ class indeterminate_bar:
       os._exit(1)
 
   def log(self,msg,fg=(255,255,255),bg=(0,0,0)):
-    print()
-    print(ldown)
-    self.freeze = True
-    print(lup,end='')
-    cprint(msg,fg,bg,end="\r")
-    print(ldown,end="")
-    self.freeze = False
+    self.logmsg= msg
+    self.lfg = fg
+    self.lbg = bg
