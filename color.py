@@ -6,8 +6,17 @@ def rgbb(r, g, b):
 
 RESET = "\u001b[0m"
 
-def cprint(text,fg=(255,255,255),bg=(0,0,0),**kwargs):
-	print(rgbf(*fg)+rgbb(*bg)+text+RESET,**kwargs)
+def cprint(text,fg=(255,255,255),bg=None,**kwargs):
+	if bg != None:
+		print(rgbf(*fg)+rgbb(*bg)+text+RESET,**kwargs)
+	else:
+		print(rgbf(*fg)+text+RESET,**kwargs)
+
+def color(text,fg=(255,255,255),bg=None,**kwargs):
+	if bg != None:
+		return(rgbf(*fg)+rgbb(*bg)+text+RESET)
+	else:
+		return(rgbf(*fg)+text+RESET)
 
 white = (255,255,255)
 black = (0,0,0)
@@ -21,3 +30,6 @@ purple = (255,0,255)
 
 orange = (255,125,0)
 pink = (255,0,145)
+
+
+warn = (255,204,0)
