@@ -21,7 +21,7 @@ class color:
   blue = (0,191,255)
 
   darkblue = (0,0,255)
-  
+
 
   yellow = (255,255,0)
   teal = (0,255,255)
@@ -105,7 +105,7 @@ class determinate:
     
     cprint(f"\r{msg}",fg,bg,flush=True)
     os._exit(1)
-  def log(self,msg,fg=(255,255,255),bg=(0,0,0)):
+  def log(self,msg,):
     self.logmsg= msg
 
 indeterminate_modes = {
@@ -169,7 +169,7 @@ class indeterminate_spin:
       cprint(f"\r{msg}",fg,bg,flush=True)
       os._exit(1)
 
-  def log(self,msg,fg=(255,255,255),bg=None):
+  def log(self,msg):
     self.logmsg= msg
 class indeterminate_bar:
   def __init__(self,format="%bar",l=50,bar="<-->",fill=mdot,fg=(255,255,255),bg=None):
@@ -215,5 +215,5 @@ class indeterminate_bar:
       cprint(f"\r{msg}",fg,bg,flush=True)
       os._exit(1)
 
-  def log(self,msg,fg=(255,255,255),bg=(0,0,0)):
+  def log(self,msg,):
     self.logmsg= msg
