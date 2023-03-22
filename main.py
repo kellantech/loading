@@ -1,6 +1,38 @@
 import math,time,os
-from color import cprint
-import color
+def rgbf(r, g, b): 
+  return f"\u001b[38;2;{r};{g};{b}m"
+
+def rgbb(r, g, b): 
+  return f"\u001b[48;2;{r};{g};{b}m"
+
+RESET = "\u001b[0m"
+
+def cprint(text,fg=(255,255,255),bg=None,**kwargs):
+  if bg != None:
+    print(rgbf(*fg)+rgbb(*bg)+text+RESET,**kwargs)
+  else:
+    print(rgbf(*fg)+text+RESET,**kwargs)
+
+class color:
+  white = (255,255,255)
+  black = (0,0,0)
+  red = (255,0,0)
+  green = (0,255,0)
+  blue = (0,191,255)
+
+  darkblue = (0,0,255)
+  
+
+  yellow = (255,255,0)
+  teal = (0,255,255)
+  purple = (255,0,255)
+
+  orange = (255,125,0)
+  pink = (255,0,145)
+
+
+  warn = (255,204,0)
+
 block = "█"
 mdot = "·"
 
@@ -26,9 +58,9 @@ class determinate:
     self.bg = bg
     self.init = 0
     self.logmsg = ""
-
-    if self.len <= 0:
-      raise ValueError("bar must have length")
+    if self.len != "full":
+      if self.len <= 0:
+        raise ValueError("bar must have length")
     self.freeze= False
   def update(self,pd=-1,done=-1,total=-1,rate=0.1):
 
@@ -39,16 +71,23 @@ class determinate:
     if pd==-1:
       pd = done//total
 
-    csx = math.floor(pd * self.len)
+    
+    if self.len == "full":
+      le,_ = os.get_terminal_size(0)
+      fmt = self.format.replace("%perc","10%").replace("%frac",f"{done}/{total}").replace("%log",self.logmsg)
+      le -= len(fmt)
+    else:
+      le = self.len
+    csx = math.floor(pd * le)
     if csx>1:
       cstr = ""
       for i in range(csx-1):
         cstr += self.char
       cstr += self.lead
-      for i in range(self.len - csx):
+      for i in range(le - csx):
         cstr += self.fill
     else:
-      cstr = self.fill * self.len
+      cstr = self.fill * le
     print("\r", end="", flush=True)
     
     perc = f"{round(pd*100)}%"
@@ -58,17 +97,16 @@ class determinate:
     print('\033[?25h', end="")
     time.sleep(rate)
   def stop(self,msg="Done!"):
+    print(end="\x1b[2K")
     print('\033[?25h', end="") 
-    cprint(f"\r{msg}" + " " * (self.len+len(self.format)+2),self.fg,self.bg)
+    cprint(f"\r{msg}" ,self.fg,self.bg)
   def error(self,msg,fg=(255,0,0),bg=(0,0,0)):
     print('\033[?25h', end="") 
-    print(end="\x1b[2K")
+    
     cprint(f"\r{msg}",fg,bg,flush=True)
     os._exit(1)
   def log(self,msg,fg=(255,255,255),bg=(0,0,0)):
     self.logmsg= msg
-    self.lfg = fg
-    self.lbg = bg
 
 indeterminate_modes = {
   "classic":["|","/","-","\\"],
@@ -108,8 +146,7 @@ class indeterminate_spin:
     self.fg = fg
     self.bg = bg
     self.logmsg = ""
-    self.lfg = (255,0,0)
-    self.lbg = None
+    
   def update(self,rate=0.1):
     print('\033[?25l', end="") 
     if not self.freeze:
@@ -134,8 +171,6 @@ class indeterminate_spin:
 
   def log(self,msg,fg=(255,255,255),bg=None):
     self.logmsg= msg
-    self.lfg = fg
-    self.lbg = bg
 class indeterminate_bar:
   def __init__(self,format="%bar",l=50,bar="<-->",fill=mdot,fg=(255,255,255),bg=None):
     self.len = l
@@ -182,5 +217,3 @@ class indeterminate_bar:
 
   def log(self,msg,fg=(255,255,255),bg=(0,0,0)):
     self.logmsg= msg
-    self.lfg = fg
-    self.lbg = bg
